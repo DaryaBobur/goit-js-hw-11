@@ -11,30 +11,46 @@ const btnLoadMore = document.querySelector('.load-more');
 let page = 1;
 let limitImg = 40;
 
-btnLoadMore.addEventListener('click', onSearchImg)
+btnLoadMore.addEventListener('click', async () => {
+  try {
+    const name = inputEl.value.trim();
+    const data = await getSearchImages(name)
+    renderGalleryImages(data); 
+    visibleBtn(data);
+    library.refresh();
+  } catch (error) {
+    console.log(error.message);
+  }
+})
  
 form.addEventListener('submit', onSearchImg);
-
+ const library = new SimpleLightbox('.photo-link');
 async function onSearchImg(e) {
   e.preventDefault();
+  galleryEl.innerHTML = '';
+  page = 1;
   try {
-    // Promise.all???
     const name = inputEl.value.trim();
     const images = await getSearchImages(name);
     renderGalleryImages(images); 
-    // theEndGalleryImg(images);
+    visibleBtn(images)
     undefinedImg(images);
-    page += 1;
-
+    Notiflix.Notify.success(`Hooray! We found ${images.data.totalHits} images.`)
+    
+   
+    library.refresh();
   }
-  catch (error) { 
+    catch (error) { 
     console.log(error.message);
   }
 }
 
 function undefinedImg(images) {
+
   if (images.data.hits.length === 0) {
-  return Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.')
+  btnLoadMore.classList.remove('is-visible');
+  Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.')
+    galleryEl.innerHTML = '';
   }
 }
 
@@ -44,8 +60,8 @@ function renderGalleryImages(images) {
 
   const markup = images.data.hits.map((image) => {
     return `
-    <div class="photo-card">
-  <img src="${image.webformatURL}" alt="${image.tags}" loading="lazy" />
+    <div class="photo-card"><a class="photo-link" href="${image.largeImageURL}">
+  <img src="${image.webformatURL}" alt="${image.tags}" loading="lazy" /></a>
   <div class="info">
     <p class="info-item">
       <b>Likes</b>: ${image.likes}
@@ -70,12 +86,24 @@ async function getSearchImages(name) {
   return response;
   }
 
+function visibleBtn(load) {
+  const total = load.data.totalHits / limitImg;
+
+  if (load.data.hits.length === 0) {
+    return;
+  } 
+  
+  else if (page >= total) {
+   btnLoadMore.classList.remove('is-visible')  
+   Notiflix.Notify.failure(`We're sorry, but you've reached the end of search results.`);
+  }
+  
+  else {
+    btnLoadMore.classList.add('is-visible');
+     page += 1;
+  }
+}
 
 
-// Функція для відображення повідомлення про закінчення зображень
-  // function theEndGalleryImg(img) {
-//     const totalHits = img.data.totalHits / limitImg;
-//     if (page > totalHits ) {
-//    Notiflix.Notify.failure(`We're sorry, but you've reached the end of search results.`);
-//   }
-// }
+ 
+
