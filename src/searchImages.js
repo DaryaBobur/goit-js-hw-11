@@ -17,6 +17,7 @@ btnLoadMore.addEventListener('click', async () => {
     const data = await getSearchImages(name)
     renderGalleryImages(data); 
     visibleBtn(data);
+    scr()
     library.refresh();
   } catch (error) {
     console.log(error.message);
@@ -36,7 +37,7 @@ async function onSearchImg(e) {
     visibleBtn(images)
     undefinedImg(images);
     Notiflix.Notify.success(`Hooray! We found ${images.data.totalHits} images.`)
-    
+    scr()
    
     library.refresh();
   }
@@ -105,5 +106,15 @@ function visibleBtn(load) {
 }
 
 
- 
+function scr() {
+
+const { height: cardHeight } = galleryEl
+  .firstElementChild.getBoundingClientRect();
+
+    window.scrollBy({
+    top: cardHeight * 2,
+    behavior: "smooth",
+  });
+ }
+
 
