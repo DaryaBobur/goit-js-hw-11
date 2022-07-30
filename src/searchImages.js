@@ -3,29 +3,32 @@ import axios from "axios";
 import Notiflix from 'notiflix';
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
+// import InfiniteScroll from 'infinite-scroll';
 
 const form = document.querySelector('#search-form');
 const galleryEl = document.querySelector('.gallery');
 const inputEl = document.querySelector('input');
 const btnLoadMore = document.querySelector('.load-more');
+const largeImg = new SimpleLightbox('.photo-link');
 let page = 1;
-let limitImg = 40;
+const limitImg = 40;
 
-btnLoadMore.addEventListener('click', async () => {
+form.addEventListener('submit', onSearchImg);
+btnLoadMore.addEventListener('click', loadMoreImg)
+ 
+async function loadMoreImg() {
   try {
     const name = inputEl.value.trim();
     const data = await getSearchImages(name)
     renderGalleryImages(data); 
     visibleBtn(data);
-    scr()
-    library.refresh();
+    smoothScroll()
+    largeImg.refresh();
   } catch (error) {
     console.log(error.message);
   }
-})
- 
-form.addEventListener('submit', onSearchImg);
- const library = new SimpleLightbox('.photo-link');
+}
+
 async function onSearchImg(e) {
   e.preventDefault();
   galleryEl.innerHTML = '';
@@ -36,12 +39,13 @@ async function onSearchImg(e) {
     renderGalleryImages(images); 
     visibleBtn(images)
     undefinedImg(images);
+    smoothScroll();
+    largeImg.refresh();
+
+      if (images.data.hits.length > 0) {
     Notiflix.Notify.success(`Hooray! We found ${images.data.totalHits} images.`)
-    scr()
-   
-    library.refresh();
   }
-    catch (error) { 
+  } catch (error) { 
     console.log(error.message);
   }
 }
@@ -56,12 +60,9 @@ function undefinedImg(images) {
 }
 
 function renderGalleryImages(images) {
-  const a = images.data.hits;
-  console.log(a)
-
   const markup = images.data.hits.map((image) => {
     return `
-    <div class="photo-card"><a class="photo-link" href="${image.largeImageURL}">
+    <div class="photo-card" item><a class="photo-link" href="${image.largeImageURL}">
   <img src="${image.webformatURL}" alt="${image.tags}" loading="lazy" /></a>
   <div class="info">
     <p class="info-item">
@@ -82,11 +83,6 @@ function renderGalleryImages(images) {
   galleryEl.insertAdjacentHTML("beforeend", markup);
 }
 
-async function getSearchImages(name) {
-  const response = await axios.get(`https://pixabay.com/api/?key=28839601-0c610efa4f554b6dcd03095ae&q=${name}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${page}`);
-  return response;
-  }
-
 function visibleBtn(load) {
   const total = load.data.totalHits / limitImg;
 
@@ -105,16 +101,31 @@ function visibleBtn(load) {
   }
 }
 
-
-function scr() {
-
+function smoothScroll() {
 const { height: cardHeight } = galleryEl
   .firstElementChild.getBoundingClientRect();
 
     window.scrollBy({
-    top: cardHeight * 2,
+    top: cardHeight,
     behavior: "smooth",
   });
  }
 
+  async function getSearchImages(name) {
+  const response = await axios.get(`https://pixabay.com/api/?key=28839601-0c610efa4f554b6dcd03095ae&q=${name}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${page}`);
+  return response;
+}
+  
+//  const infScroll = new InfiniteScroll('.container', {
+//   // responseType: 'image',
+//   history: false,
+//   path() {
+//     return `https://pixabay.com/api/?key=28839601-0c610efa4f554b6dcd03095ae&q=${name}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${page}`;
+//   },
+// })
 
+// infScroll.loadNextPage();
+
+// infScroll.on('load', (response, path) => {
+//   console.log(response);
+// })
