@@ -25,6 +25,10 @@ button {
     cursor: pointer;
 }
 
+button:hover {
+    background-color: #8c9ba8;
+}
+
 .load-more {
 display: none;
 
@@ -79,11 +83,14 @@ margin-left: 10px;
 }
 
 .search-form {
+    position:sticky;
+    top: -1px;
+
     display: flex;
     align-items: center;
     justify-content: center;
 
-    margin-bottom: 30px;
+    margin-bottom: 10px;
     background-color: #e6e6fa;
     padding: 10px;
     border-radius: 10px;
@@ -97,4 +104,3 @@ input {
     outline: none;
     margin-right: 5px;
 }
-
